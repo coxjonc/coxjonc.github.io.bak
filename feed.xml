@@ -5,8 +5,8 @@
     <description>Reporter and news app developer. Django, React, D3, LeafletJS</description>
     <link>http://geezhawk.github.io/</link>
     <atom:link href="http://geezhawk.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 14 Apr 2016 21:57:28 +0700</pubDate>
-    <lastBuildDate>Thu, 14 Apr 2016 21:57:28 +0700</lastBuildDate>
+    <pubDate>Thu, 14 Apr 2016 22:03:58 +0700</pubDate>
+    <lastBuildDate>Thu, 14 Apr 2016 22:03:58 +0700</lastBuildDate>
     <generator>Jekyll v3.0.3</generator>
     
       <item>
@@ -291,7 +291,7 @@ user’s username.&lt;/p&gt;
         <title>Using React with Django, with a little help from Webpack</title>
         <description>&lt;p&gt;&lt;em&gt;View the complete app, with different stages tagged, on &lt;a href=&quot;https://github.com/geezhawk/drf-react.git&quot;&gt;Github&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Hooking React into your Django app can really be difficult, especially if you’re unfamiliar with webpack, npm, and babel.&lt;/p&gt;
+&lt;p&gt;Hooking React into your Django app can be difficult, especially if you’re unfamiliar with webpack, npm, and babel.&lt;/p&gt;
 
 &lt;p&gt;I recommend you take the time to read the docs for all these tools, but to get you started I’m going to walk you through how to get Django Rest Framework (DRF) to work with React. This tutorial assumes you already have DRF set up (tag v0.0.1 in the Github repo). If you don’t know how to set up DRF, work through the &lt;a href=&quot;http://www.django-rest-framework.org/tutorial/1-serialization/&quot;&gt;tutorial&lt;/a&gt;.&lt;/p&gt;
 
