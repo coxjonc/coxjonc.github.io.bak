@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
+  <style>
+        .axis path, 
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+        .label {
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+        .title {
+            font-family: sans-serif;
+            font-size: 30px;
+        }
+        input {
+          top: 30px;
+          left: 400px;
+          position: absolute;
+        }
+        label {
+          top: 30px;
+          left: 370px;
+          position: absolute;
+        }
+  </style>
+</head>
+<body>
+  <h1 class="title">Minimum Wage by State</h1>
+  <label for="sort" class="label">Sort</label>
+  <input type="checkbox" id="sort"/>
+  <svg id="chart"/>
+  <script src="chart.js" type="text/javascript"></script>
+</body>
+</html>

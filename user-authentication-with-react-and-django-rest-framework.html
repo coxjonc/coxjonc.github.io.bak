@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <title>
+         Token-based authentication with Django and React
+        
+    </title>
+
+    <meta name="robots" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="cleartype" content="on">
+
+     <link rel="stylesheet" href="http://localhost:4000/css/syntax.css" type='text/css'> 
+    <link rel="stylesheet" href="http://localhost:4000/css/main.css" type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,700' rel='stylesheet' type='text/css'>
+    <link rel="alternate" type="application/rss+xml" title="Jonathan Cox" href="http://localhost:4000/feed.xml">
+    <style>
+      img {
+        height: auto;
+        left: 50%;
+        position: relative;
+        margin-left: -150px;
+      }
+    </style>
+
+</head>
+
+<body>
+    <header id="top" class="main-header">
+
+        <div class="module title color-1">
+            <h1><a href="http://localhost:4000/">Jonathan Cox</a></h1>
+        </div>
+
+        <div class="module description color-2">
+            Reporter and news app developer. Django, React, D3, LeafletJS
+        </div>
+
+        <nav class="module main-menu color-4">
+            <a href="http://localhost:4000/">Home</a>
+            <a href="http://localhost:4000/me/">Who is Jon?</a>
+            <a href="http://localhost:4000/portfolio/">Portfolio</a>
+        </nav>
+
+        <div class="module links color-3">
+            <a href="mailto:jonathan.cox.c@gmail.com" title="Email address" >email</a>
+            <a href="https://github.com/geezhawk" title="Profile in Github" target="_blank">github</a>
+            <a href="https://twitter.com/geezhawk" title="Profile in Twitter" target="_blank">twitter</a>
+        </div>
+
+    </header>
+
+    <div class="main-content">
+
+    <article class="module color-3">
+        <h1>Token-based authentication with Django and React</h1>
+        <hr>
+        <p>This tutorial will show you how to create a simple React app that uses Django Rest Framework’s token authentication to grant or deny users access to certain pages. If you want to see the finished product, <a href="https://github.com/geezhawk/django-react-auth">check out the github page for this tutorial</a>. This will be our basic workflow:</p>
+
+<ol>
+  <li>When a user tries to access the app without authenticating, reroute them to the login page.</li>
+  <li>After the user enters their credentials, send these credentials to Django Rest Framework (DRF). If the credentials are valid return an authentication token.</li>
+  <li>Store the token in localStorage so that it can be automatically submitted as a header with future HTTP requests.</li>
+  <li>Reroute the user from the login page to the app, using the token to grant them access to their data.</li>
+  <li>When the user clicks the logout button, delete the token in localStorage and reroute them to the login page.</li>
+</ol>
+
+<p>Setting up the backend will be relatively easy. All we have to do is to add a <code class="highlighter-rouge">post_save</code> signal handler that creates a Token object whenever a new user object is created. DRF provides us with an <code class="highlighter-rouge">obtain_auth_token</code> view, which responds with a token when passed a valid username and password. Then it’s simply a matter of adding that token as a header to our HTTP requests.</p>
+
+<p>Dealing with authentication on the frontend is a little trickier. We will use <code class="highlighter-rouge">react-router</code>’s <code class="highlighter-rouge">onEnter</code> hooks to check whether a user is authenticated when they try to access certain pages, and reroute them if they aren’t authenticated. We’ll also create a login function that gets the token from the API and stores it in localStorage.</p>
+
+<h2 id="backend">Backend</h2>
+<p>First, create a file named <code class="highlighter-rouge">signals.py</code> in your app directory and add the following signal handler:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#signals.py</span>
+
+<span class="kn">from</span> <span class="nn">django.db.models.signals</span> <span class="kn">import</span> <span class="n">post_save</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.dispatch</span> <span class="kn">import</span> <span class="n">receiver</span>
+<span class="kn">from</span> <span class="nn">rest_framework.authtoken.models</span> <span class="kn">import</span> <span class="n">Token</span>
+
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_save</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">User</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">init_new_user</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
+        <span class="n">Token</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span></code></pre></figure>
+
+<p>Whenever a new user is created, this signal handler creates a new <code class="highlighter-rouge">Token</code> object linked to that user.</p>
+
+<p>If you haven’t already, make sure that <code class="highlighter-rouge">signals.py</code> is imported when the app is loaded. To do this, override the <code class="highlighter-rouge">ready</code> method in your AppConfig class in <code class="highlighter-rouge">apps.py</code>.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#apps.py</span>
+
+<span class="kn">from</span> <span class="nn">django.apps</span> <span class="kn">import</span> <span class="n">AppConfig</span>
+
+<span class="k">class</span> <span class="nc">ApiConfig</span><span class="p">(</span><span class="n">AppConfig</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">'api'</span>
+
+    <span class="k">def</span> <span class="nf">ready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">signals</span></code></pre></figure>
+
+<p>Last of all, set this as your default app config in your app’s <code class="highlighter-rouge">init.py</code>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#__init__.py</span>
+
+<span class="n">default_app_config</span> <span class="o">=</span> <span class="s">'api.apps.ApiConfig'</span></code></pre></figure>
+
+<p>Django now knows to create a new token for each new User object. But the token is useless if our frontend has no way to get to it. Lucky for us, DRF comes with a view that returns a token if you pass it a valid username/password combo. To use it, you first need to add <code class="highlighter-rouge">rest_framework.authtoken</code> to the list of <code class="highlighter-rouge">INSTALLED_APPS</code> in <code class="highlighter-rouge">settings.py</code>, then set the default authentication for DRF as follows:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#settings.py</span>
+
+<span class="n">REST_FRAMEWORK</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">'DEFAULT_AUTHENTICATION_CLASSES'</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s">'rest_framework.authentication.TokenAuthentication'</span><span class="p">,</span>
+        <span class="s">'rest_framework.authentication.SessionAuthentication'</span>   
+    <span class="p">)</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Now create a custom route for our viewset in <code class="highlighter-rouge">views.py</code> that returns user data when an authenticated user sends a request:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#views.py</span>
+
+<span class="k">class</span> <span class="nc">UserViewVSet</span><span class="p">(</span><span class="n">viewsets</span><span class="o">.</span><span class="n">ModelViewSet</span><span class="p">):</span>
+    <span class="n">queryset</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="nb">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">UserSerializer</span>
+
+    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">pk</span> <span class="o">==</span> <span class="s">'i'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">UserSerializer</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                <span class="n">context</span><span class="o">=</span><span class="p">{</span><span class="s">'request'</span><span class="p">:</span><span class="n">request</span><span class="p">})</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserViewSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">)</span></code></pre></figure>
+
+<p>Last of all, let’s add the <code class="highlighter-rouge">obtain_auth_token</code> view to our urlconf:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#urls.py</span>
+
+<span class="kn">from</span> <span class="nn">rest_framework.authtoken.views</span> <span class="kn">import</span> <span class="n">obtain_auth_token</span>
+
+<span class="n">urlpatterns</span> <span class="o">+=</span> <span class="p">[</span> <span class="n">url</span><span class="p">(</span><span class="s">r'^obtain-auth-token/$'</span><span class="p">,</span> <span class="n">obtain_auth_token</span><span class="p">)</span> <span class="p">]</span></code></pre></figure>
+
+<p>Okay, enough coding. Open a terminal and let’s see if this works as advertised:</p>
+
+<p><code class="highlighter-rouge">$ curl localhost:8000/users/i/</code></p>
+
+<p><code class="highlighter-rouge"><span class="p">{</span><span class="nt">"detail"</span><span class="p">:</span><span class="s2">"Authentication credentials were not provided."</span><span class="p">}</span></code></p>
+
+<p>–</p>
+
+<p><code class="highlighter-rouge">$ curl -X POST -d "username=user&amp;password=pass" localhost:8000/obtain-auth-token/</code></p>
+
+<p><code class="highlighter-rouge"><span class="p">{</span><span class="nt">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">"token"</span><span class="p">}</span></code></p>
+
+<p>–</p>
+
+<p><code class="highlighter-rouge">$ curl -H "Authorization: Token {your token here}" localhost:8000/users/i/</code></p>
+
+<h2 id="frontend">Frontend</h2>
+
+<p>We’re now going to create a simple single-page React app that makes use of this authorization backend. We’ll be using jQuery to make the AJAX requests cleaner, but you can use plain Javascript if you prefer. If you aren’t sure how to make React work with a Django backend (or are unsure about plugging in jQuery), check out <a href="http://geezhawk.github.io/2016/02/02/using-react-with-django-rest-framework.html">my earlier tutorial</a>.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">//index.jsx</span>
+
+<span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">ReactDOM</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react-dom'</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">Router</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react-router'</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">App</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./app'</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">Login</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./login'</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">auth</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./auth'</span><span class="p">)</span>
+
+<span class="kd">function</span> <span class="nx">requireAuth</span><span class="p">(</span><span class="nx">nextState</span><span class="p">,</span> <span class="nx">replace</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">auth</span><span class="p">.</span><span class="nx">loggedIn</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">replace</span><span class="p">({</span> 
+            <span class="na">pathname</span><span class="p">:</span><span class="s1">'/app/login/'</span><span class="p">,</span>
+            <span class="na">state</span><span class="p">:</span> <span class="p">{</span><span class="na">nextPathname</span><span class="p">:</span> <span class="s1">'/app/'</span><span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">ReactDOM</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">Router</span><span class="p">.</span><span class="nx">Router</span> <span class="nx">history</span><span class="o">=</span><span class="p">{</span><span class="nx">Router</span><span class="p">.</span><span class="nx">browserHistory</span><span class="p">}</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">Router</span><span class="p">.</span><span class="nx">Route</span> <span class="nx">path</span><span class="o">=</span><span class="s1">'/app/login/'</span> <span class="nx">component</span><span class="o">=</span><span class="p">{</span><span class="nx">Login</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">Router</span><span class="p">.</span><span class="nx">Route</span> <span class="nx">path</span><span class="o">=</span><span class="s1">'/app/'</span> <span class="nx">component</span><span class="o">=</span><span class="p">{</span><span class="nx">App</span><span class="p">}</span> <span class="nx">onEnter</span><span class="o">=</span><span class="p">{</span><span class="nx">requireAuth</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/Router.Router&gt;</span><span class="err">,
+</span>    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'app'</span><span class="p">)</span>    
+<span class="p">)</span></code></pre></figure>
+
+<p>When a user tries to access <code class="highlighter-rouge">/app/</code>, the <code class="highlighter-rouge">requireAuth()</code> function fires. If the user isn’t logged in, it reroutes them to the login component. Not only that, it adds information about the route the user was trying to access to the <code class="highlighter-rouge">login</code> component’s state. That means that after the user logs in successfully, you can reroute them to the page they were trying to access in the first place.</p>
+
+<p>Now, let’s create an <code class="highlighter-rouge">auth.js</code> file to contain the authentication logic.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">//auth.js</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">login</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">username</span><span class="p">,</span> <span class="nx">pass</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">cb</span><span class="p">)</span> <span class="nx">cb</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="p">}</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">getToken</span><span class="p">(</span><span class="nx">username</span><span class="p">,</span> <span class="nx">pass</span><span class="p">,</span> <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">authenticated</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">localStorage</span><span class="p">.</span><span class="nx">token</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">token</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">cb</span><span class="p">)</span> <span class="nx">cb</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">cb</span><span class="p">)</span> <span class="nx">cb</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">},</span>        
+    
+    <span class="nx">logout</span><span class="err">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">delete</span> <span class="nx">localStorage</span><span class="p">.</span><span class="nx">token</span>
+    <span class="p">},</span>
+
+    <span class="nx">loggedIn</span><span class="err">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">!!</span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">token</span>
+    <span class="p">},</span>
+
+    <span class="nx">getToken</span><span class="err">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">username</span><span class="p">,</span> <span class="nx">pass</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+            <span class="na">type</span><span class="p">:</span> <span class="s1">'POST'</span><span class="p">,</span>
+            <span class="na">url</span><span class="p">:</span> <span class="s1">'/api/obtain-auth-token/'</span><span class="p">,</span>
+            <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">username</span><span class="p">:</span> <span class="nx">username</span><span class="p">,</span>
+                <span class="na">password</span><span class="p">:</span> <span class="nx">pass</span>
+            <span class="p">},</span>
+            <span class="na">success</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">res</span><span class="p">){</span>
+                <span class="nx">cb</span><span class="p">({</span>
+                    <span class="na">authenticated</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                    <span class="na">token</span><span class="p">:</span> <span class="nx">res</span><span class="p">.</span><span class="nx">token</span>
+                <span class="p">})</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">},</span> 
+<span class="p">}</span></code></pre></figure>
+
+<p>Our auth class’s <code class="highlighter-rouge">logout()</code> and <code class="highlighter-rouge">loggedIn()</code> functions are pretty self-explanatory. The <code class="highlighter-rouge">login()</code> function is a little trickier. It takes a username and password, and passes them to the getToken function. This function - you guessed it - get the authentication token from the API.</p>
+
+<p>Here’s what our login component will look like:</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">//login.jsx</span>
+
+<span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">auth</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./auth'</span><span class="p">)</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+    <span class="na">contextTypes</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">router</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">object</span><span class="p">.</span><span class="nx">isRequired</span>
+    <span class="p">},</span>
+
+    <span class="na">handleSubmit</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
+
+        <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">refs</span><span class="p">.</span><span class="nx">username</span><span class="p">.</span><span class="nx">value</span>
+        <span class="kd">var</span> <span class="nx">pass</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">refs</span><span class="p">.</span><span class="nx">pass</span><span class="p">.</span><span class="nx">value</span>
+
+        <span class="nx">auth</span><span class="p">.</span><span class="nx">login</span><span class="p">(</span><span class="nx">username</span><span class="p">,</span> <span class="nx">pass</span><span class="p">,</span> <span class="p">(</span><span class="nx">loggedIn</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">loggedIn</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">context</span><span class="p">.</span><span class="nx">router</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s1">'/app/'</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+    <span class="p">},</span>
+    
+    <span class="nx">render</span><span class="err">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">form</span> <span class="nx">onSubmit</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleSubmit</span><span class="p">}</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">"text"</span> <span class="nx">placeholder</span><span class="o">=</span><span class="s2">"username"</span> <span class="nx">ref</span><span class="o">=</span><span class="s2">"username"</span> <span class="o">/&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">"password"</span> <span class="nx">placeholder</span><span class="o">=</span><span class="s2">"password"</span> <span class="nx">ref</span><span class="o">=</span><span class="s2">"pass"</span> <span class="o">/&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">"submit"</span> <span class="o">/&gt;</span>
+            <span class="o">&lt;</span><span class="sr">/form</span><span class="err">&gt;
+</span>        <span class="p">)</span>    
+    <span class="p">}</span>
+<span class="p">})</span></code></pre></figure>
+
+<p>If the request was successful and the token has been set, the <code class="highlighter-rouge">handleSubmit()</code> function will reroute the user to the <code class="highlighter-rouge">/app/</code> page, which will display their data.</p>
+
+<p>Last of all, here’s the app page. It simply displays a message, followed by the authenticated
+user’s username.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">//app.jsx</span>
+
+<span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">auth</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./auth'</span><span class="p">)</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+   <span class="na">getInitialState</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">'user'</span><span class="p">:[]}</span>
+    <span class="p">},</span>
+
+    <span class="na">componentDidMount</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">loadUserData</span><span class="p">()</span>
+    <span class="p">},</span>
+            
+    <span class="nx">contextTypes</span><span class="err">:</span> <span class="p">{</span>
+        <span class="nl">router</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">object</span><span class="p">.</span><span class="nx">isRequired</span>
+    <span class="p">},</span>
+
+    <span class="nx">logoutHandler</span><span class="err">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">auth</span><span class="p">.</span><span class="nx">logout</span><span class="p">()</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">context</span><span class="p">.</span><span class="nx">router</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s1">'/app/login/'</span><span class="p">)</span>
+    <span class="p">},</span>
+
+    <span class="nx">loadUserData</span><span class="err">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+            <span class="na">method</span><span class="p">:</span> <span class="s1">'GET'</span><span class="p">,</span>
+            <span class="na">url</span><span class="p">:</span> <span class="s1">'/api/users/i/'</span><span class="p">,</span>
+            <span class="na">datatype</span><span class="p">:</span> <span class="s1">'json'</span><span class="p">,</span>
+            <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">'Authorization'</span><span class="p">:</span> <span class="s1">'Token '</span> <span class="o">+</span> <span class="nx">localStorage</span><span class="p">.</span><span class="nx">token</span>
+            <span class="p">},</span>
+            <span class="na">success</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="na">user</span><span class="p">:</span> <span class="nx">res</span><span class="p">)</span>
+            <span class="p">}.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+        <span class="p">})</span>
+    <span class="p">},</span>
+
+    <span class="nx">render</span><span class="err">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">You</span> <span class="nx">are</span> <span class="nx">now</span> <span class="nx">logged</span> <span class="k">in</span><span class="p">,</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">user</span><span class="p">.</span><span class="nx">username</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/h1</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">logoutHandler</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Log</span> <span class="nx">out</span><span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="p">)</span>        
+    <span class="p">}</span>
+<span class="p">})</span></code></pre></figure>
+
+<p>This component is pretty straightforward. The important thing to remember is that you need to add an Authorization header to your GET requests, or else DRF will throw an error. This component also includes a logout button that simply deletes the token from localStorage and reroutes the user to the login page.</p>
+
+
+        <p class="top"><small><a href="#top">[top]</a></small></p>
+    </article>
+
+
+    <div class="social module">
+        <ul>
+
+            
+
+            
+
+            
+            
+
+            <li class="fb">
+            <a target="_blank" title="Share on Facebook" href="https://www.facebook.com/sharer/sharer.php?t=Token-based authentication with Django and React&u=http://localhost:4000/user-authentication-with-react-and-django-rest-framework">Facebook</a></li>
+            <li class="tw"><a target="_blank" title="Share on Twitter" href="https://twitter.com/intent/tweet?text=Token-based authentication with Django and React&url=http://localhost:4000/user-authentication-with-react-and-django-rest-framework&via=geezhawk&hashtags=">Twitter</a></li>
+            <li class="gp"><a target="_blank" title="Share on Google+" href="https://plus.google.com/share?url=http://localhost:4000/user-authentication-with-react-and-django-rest-framework">Google+</a></li>
+        </ul>
+    </div>
+
+
+
+</div>
+
+
+
+
+
+    <div class="footer module">
+    <span class="licence">Copyright 2015 &copy; Minimal-block.</span>
+    <p>
+        Powered by <a href="http://jekyllrb.com/" target="_blank">Jekyllrb</a>.
+        The <a href="https://github.com/drvy/minimal-block" target="_blank">minimal-block theme.</a>
+    </p>
+</div>
+
+</body>
+</html>
