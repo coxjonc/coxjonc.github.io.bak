@@ -54,7 +54,7 @@ var revenueSliderHandle = revenueSlider.append('div')
 var revenueTitle = d3.select('.revenue')
   .append('h1')
     .html('Casino revenue</br>' 
-        + d3.format('.0d')(revenue) + '$ million');
+        + '$' + d3.format('.0d')(revenue) + ' million');
 
 // Define event listeners for sliders
 var dispatch = d3.dispatch('taxSliderChange', 'revenueSliderChange');
@@ -71,7 +71,7 @@ dispatch.on('revenueSliderChange', function(value) {
     fundingSpan.html('SCHOOLS GET<br/>$' + d3.round(revenue * tax) + ' mil');
     revenueSliderHandle.style('left', revenueScale(value) + 'px');
     revenueTitle.html('Casino revenue<br/>' 
-        + d3.format('.0d')(d3.round(value)) + '$ million');
+        + '$' + d3.format('.0d')(d3.round(value)) + '$ million');
 });
 
 // Define drag behavior
