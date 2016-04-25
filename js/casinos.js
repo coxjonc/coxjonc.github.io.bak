@@ -71,7 +71,7 @@ dispatch.on('revenueSliderChange', function(value) {
     fundingSpan.html('SCHOOLS GET<br/>$' + d3.round(revenue * tax) + ' mil');
     revenueSliderHandle.style('left', revenueScale(value) + 'px');
     revenueTitle.html('Casino revenue<br/>' 
-        + '$' + d3.format('.0d')(d3.round(value)) + '$ million');
+        + '$' + d3.format('.0d')(d3.round(value)) + ' million');
 });
 
 // Define drag behavior
