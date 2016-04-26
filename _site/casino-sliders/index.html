@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<style>
+body {
+  background-color: #EEEEEE;
+  font-family: sans-serif;
+}
+
+.main {
+  position: relative;
+  width: 600px;
+  left: 50%;
+  margin-left: -300px;
+}
+
+.taxSlider {
+  position: relative;
+  top: 40px;
+}
+
+.revenueSlider {
+  position: relative;
+  top: 40px;
+}
+
+.slider-tray {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border: solid 1px #ccc;
+  border-top-color: #aaa;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.slider-handle {
+  position: relative;
+  top: 3px;
+}
+
+.slider-handle-icon {
+  width: 14px;
+  height: 14px;
+  border: solid 1px #aaa;
+  position: relative;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  top: -14px;
+  left: -14px;
+}
+h2 {
+  font-size: 40px;
+}
+
+h1 {
+  font-size: 20px;
+  position: relative;
+  margin-bottom: -20px;
+  margin-top: 50px;
+}
+
+p {
+  width: 400px;
+}
+
+.funding {
+  font-weight: bold;
+  position: absolute;
+  font-size: 30px;
+  top: 330px;
+  right: 150px;
+  width: 300px;
+  text-align: right;
+}
+
+</style>
+</head>
+<body>
+<div class="main">
+<h2>Should Georgia roll the dice on casinos?</h2>
+<p>MGM Resorts International wants the Georgia legislature to legalize casinos. 
+They promise that a gambling tax would help cover 
+the shortfall in the state's education budget.</p>
+<p>But are these promises realistic? Move the sliders below to 
+see if taxing casinos would put a dent in the annual education budget.</p>
+  <div class="title tax"></div>
+  <div class="taxSlider"></div>
+  <div class="title revenue"></div>
+  <div class="revenueSlider"></div>
+  <span class="funding"></span>
+</div>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="/js/casinos.js"></script>
+</body>
