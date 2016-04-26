@@ -92,10 +92,13 @@ the datapoint closest to the user’s mouse.<br />
 <a href="https://gist.github.com/geezhawk/e0c0a6b8b4505693cb53118d0e4cac37">Source on GitHub</a></p>
 
 <h2 id="apps">Apps</h2>
-<p>I’ve built a number of projects using a Postgres - Django Rest Framework - React stack, as well as a couple Chrome extensions.</p>
+<p>I’ve built a number of projects using a Postgres - Django Rest Framework - React stack, as well as a couple Chrome extensions and a chat bot powered by NodeJS and Socket.io.</p>
 
 <h3 id="flighthoundhttpsgithubcomgeezhawkflighthound"><a href="https://github.com/geezhawk/flighthound">Flighthound</a></h3>
 <p>A single-page application built with Django Rest Framework and React that allows users to create flight price alerts and emails them when the price of a flight drops below the price they’ve set. Features live updates, a management command to get pricing from Google’s QPX cheap flights API, and a user authentication system that uses <code>react-router</code> to control access to certain pages.</p>
+
+<h3 id="elizabethan-insult-bothttpsgithubcomgeezhawkelizabethan-insult-bot"><a href="https://github.com/geezhawk/elizabethan-insult-bot">Elizabethan Insult Bot</a></h3>
+<p>A simple chat bot with an Express server that uses Socket.io to listen for messages on sockets and update the page quickly with the user’s message and an automatically-generated response from the server. In this case the response isn’t particularly useful - just a randomly-generated burn composed of popular Elizabethan insults.</p>
 
 <h3 id="sun-never-sets-on-ushttpsgithubcomgeezhawkdjango-imprecise-location-sharing"><a href="https://github.com/geezhawk/django-imprecise-location-sharing">Sun Never Sets on Us</a></h3>
 <p>An imprecise location-sharing app built with Django that allows users to share which city they’re in with friends, and sends them weekly email updates about where their friend group has moved. It’s linked to a <a href="https://github.com/geezhawk/location-sharing-extension">chrome extension</a> that gets the user’s location with the HTML5 navigator API, and uses Google’s reverse-geocoding API to find the city name. The app features a system for creating “friendships” between users, and sends friend requests via AJAX without a page refresh.</p>
