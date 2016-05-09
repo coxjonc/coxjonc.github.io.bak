@@ -49,28 +49,28 @@
 	var Select = __webpack_require__(160);
 	var chart = __webpack_require__(167);
 
-	__webpack_require__(168);
+	__webpack_require__(169);
 
 	var App = React.createClass({
-	    displayName: "App",
+	    displayName: 'App',
 
 	    getInitialState: function () {
 	        return {
-	            citySelectValue: "x",
+	            citySelectValue: 'x',
 	            cityOptions: [],
-	            zmw: "",
+	            zmw: '',
 	            weatherData: [],
-	            type: "metric"
+	            type: 'metric'
 	        };
 	    },
 
 	    updateCities: function (input, callback) {
 	        $.ajax({
-	            method: "GET",
-	            url: "http://autocomplete.wunderground.com/aq",
+	            method: 'GET',
+	            url: 'http://autocomplete.wunderground.com/aq',
 	            data: { query: input },
-	            dataType: "jsonp",
-	            jsonp: "cb",
+	            dataType: 'jsonp',
+	            jsonp: 'cb',
 	            crossDomain: true,
 	            success: function (data) {
 	                var data = data.RESULTS.map(function (city) {
@@ -85,47 +85,52 @@
 	    getWeather: function () {
 	        $.ajax({
 	            method: 'GET',
-	            url: "http://api.wunderground.com/api/f8e80b5bdc3e3694/hourly/q/zmw:" + this.state.zmw + ".json",
-	            dataType: "jsonp",
-	            jsonp: "callback",
+	            url: 'http://api.wunderground.com/api/f8e80b5bdc3e3694/' + 'hourly10day/almanac/q/zmw:' + this.state.zmw + '.json',
+	            dataType: 'jsonp',
+	            jsonp: 'callback',
 	            crossDomain: true,
 	            success: function (data) {
 	                this.setState({ weatherData: data });
-	                chart.generateChart(this.state.weatherData, this.state.type, this.state.citySelectValue.label);
+	                chart.generateChart(this.state.weatherData, this.state.type);
 	            }.bind(this)
 	        });
 	    },
 
 	    updateSelected: function (val) {
-	        this.setState({ citySelectValue: val, zmw: val.value });
+	        this.setState({ citySelectValue: val ? val : '',
+	            zmw: val ? val.value : '' });
 	        setTimeout(this.getWeather, 500);
 	    },
 
 	    render: function () {
 	        return React.createElement(
-	            "div",
+	            'div',
 	            null,
 	            React.createElement(
-	                "h1",
+	                'h1',
 	                null,
-	                "Weather"
+	                '72-Hour Forecast'
 	            ),
 	            React.createElement(
-	                "h2",
+	                'h2',
 	                null,
-	                "Enter any city in the world"
+	                'Enter any city in the world'
 	            ),
-	            React.createElement(Select.Async, {
-	                value: this.state.citySelectValue,
-	                onChange: this.updateSelected,
-	                loadOptions: this.updateCities,
-	                minimumInput: 2
-	            })
+	            React.createElement(
+	                'div',
+	                { id: 'select' },
+	                React.createElement(Select.Async, {
+	                    value: this.state.citySelectValue,
+	                    onChange: this.updateSelected,
+	                    loadOptions: this.updateCities,
+	                    minimumInput: 2
+	                })
+	            )
 	        );
 	    }
 	});
 
-	ReactDOM.render(React.createElement(App, null), document.getElementById("app"));
+	ReactDOM.render(React.createElement(App, null), document.getElementById('app'));
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ },
@@ -133,7 +138,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	 * jQuery JavaScript Library v2.2.2
+	 * jQuery JavaScript Library v2.2.3
 	 * http://jquery.com/
 	 *
 	 * Includes Sizzle.js
@@ -143,7 +148,7 @@
 	 * Released under the MIT license
 	 * http://jquery.org/license
 	 *
-	 * Date: 2016-03-17T17:51Z
+	 * Date: 2016-04-05T19:26Z
 	 */
 
 	(function( global, factory ) {
@@ -199,7 +204,7 @@
 
 
 	var
-		version = "2.2.2",
+		version = "2.2.3",
 
 		// Define a local copy of jQuery
 		jQuery = function( selector, context ) {
@@ -9609,7 +9614,7 @@
 			// If it fails, this function gets "jqXHR", "status", "error"
 			} ).always( callback && function( jqXHR, status ) {
 				self.each( function() {
-					callback.apply( self, response || [ jqXHR.responseText, status, jqXHR ] );
+					callback.apply( this, response || [ jqXHR.responseText, status, jqXHR ] );
 				} );
 			} );
 		}
@@ -29644,7 +29649,7 @@
 		propTypes: {
 			addLabelText: _react2['default'].PropTypes.string, // placeholder displayed when you want to add a label on a multi-value input
 			allowCreate: _react2['default'].PropTypes.bool, // whether to allow creation of new entries
-			autoBlur: _react2['default'].PropTypes.bool,
+			autoBlur: _react2['default'].PropTypes.bool, // automatically blur the component when an option is selected
 			autofocus: _react2['default'].PropTypes.bool, // autofocus the component on mount
 			autosize: _react2['default'].PropTypes.bool, // whether to enable autosizing or not
 			backspaceRemoves: _react2['default'].PropTypes.bool, // whether backspace removes an item if there is no text input
@@ -29660,6 +29665,7 @@
 			ignoreAccents: _react2['default'].PropTypes.bool, // whether to strip diacritics when filtering
 			ignoreCase: _react2['default'].PropTypes.bool, // whether to perform case-insensitive filtering
 			inputProps: _react2['default'].PropTypes.object, // custom attributes for the Input
+			inputRenderer: _react2['default'].PropTypes.func, // returns a custom input component
 			isLoading: _react2['default'].PropTypes.bool, // whether the Select is loading externally or not (such as options being loaded)
 			joinValues: _react2['default'].PropTypes.bool, // joins multiple values into a single form field with the delimiter (legacy mode)
 			labelKey: _react2['default'].PropTypes.string, // path of the label value in option objects
@@ -29683,17 +29689,20 @@
 			onOpen: _react2['default'].PropTypes.func, // fires when the menu is opened
 			onValueClick: _react2['default'].PropTypes.func, // onClick handler for value labels: function (value, event) {}
 			openAfterFocus: _react2['default'].PropTypes.bool, // boolean to enable opening dropdown when focused
+			openOnFocus: _react2['default'].PropTypes.bool, // always open options menu on focus
 			optionClassName: _react2['default'].PropTypes.string, // additional class(es) to apply to the <Option /> elements
 			optionComponent: _react2['default'].PropTypes.func, // option component to render in dropdown
 			optionRenderer: _react2['default'].PropTypes.func, // optionRenderer: function (option) {}
 			options: _react2['default'].PropTypes.array, // array of options
 			placeholder: stringOrNode, // field placeholder, displayed when there's no value
 			required: _react2['default'].PropTypes.bool, // applies HTML5 required attribute when needed
+			resetValue: _react2['default'].PropTypes.any, // value to use when you clear the control
 			scrollMenuIntoView: _react2['default'].PropTypes.bool, // boolean to enable the viewport to shift so that the full menu fully visible when engaged
 			searchable: _react2['default'].PropTypes.bool, // whether to enable searching feature or not
 			simpleValue: _react2['default'].PropTypes.bool, // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
 			style: _react2['default'].PropTypes.object, // optional style to apply to the control
 			tabIndex: _react2['default'].PropTypes.string, // optional tab index of the control
+			tabSelectsValue: _react2['default'].PropTypes.bool, // whether to treat tabbing out while focused to be value selection
 			value: _react2['default'].PropTypes.any, // initial field value
 			valueComponent: _react2['default'].PropTypes.func, // value component to render
 			valueKey: _react2['default'].PropTypes.string, // path of the label value in option objects
@@ -29732,9 +29741,11 @@
 				optionComponent: _Option2['default'],
 				placeholder: 'Select...',
 				required: false,
+				resetValue: null,
 				scrollMenuIntoView: true,
 				searchable: true,
 				simpleValue: false,
+				tabSelectsValue: true,
 				valueComponent: _Value2['default'],
 				valueKey: 'value'
 			};
@@ -29747,8 +29758,18 @@
 				isLoading: false,
 				isOpen: false,
 				isPseudoFocused: false,
-				required: this.props.required && this.handleRequired(this.props.value, this.props.multi)
+				required: false
 			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			var valueArray = this.getValueArray(this.props.value);
+
+			if (this.props.required) {
+				this.setState({
+					required: this.handleRequired(valueArray[0], this.props.multi)
+				});
+			}
 		},
 
 		componentDidMount: function componentDidMount() {
@@ -29758,9 +29779,11 @@
 		},
 
 		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			if (this.props.value !== nextProps.value && nextProps.required) {
+			var valueArray = this.getValueArray(nextProps.value);
+
+			if (nextProps.required) {
 				this.setState({
-					required: this.handleRequired(nextProps.value, nextProps.multi)
+					required: this.handleRequired(valueArray[0], nextProps.multi)
 				});
 			}
 		},
@@ -29783,9 +29806,6 @@
 				this.hasScrolledToOption = false;
 			}
 
-			if (prevState.inputValue !== this.state.inputValue && this.props.onInputChange) {
-				this.props.onInputChange(this.state.inputValue);
-			}
 			if (this._scrollToFocusedOptionOnUpdate && this.refs.focused && this.refs.menu) {
 				this._scrollToFocusedOptionOnUpdate = false;
 				var focusedDOM = _reactDom2['default'].findDOMNode(this.refs.focused);
@@ -29799,7 +29819,7 @@
 			if (this.props.scrollMenuIntoView && this.refs.menuContainer) {
 				var menuContainerRect = this.refs.menuContainer.getBoundingClientRect();
 				if (window.innerHeight < menuContainerRect.bottom + this.props.menuBuffer) {
-					window.scrollTo(0, window.scrollY + menuContainerRect.bottom + this.props.menuBuffer - window.innerHeight);
+					window.scrollBy(0, menuContainerRect.bottom + this.props.menuBuffer - window.innerHeight);
 				}
 			}
 			if (prevProps.disabled !== this.props.disabled) {
@@ -29923,7 +29943,7 @@
 		},
 
 		handleInputFocus: function handleInputFocus(event) {
-			var isOpen = this.state.isOpen || this._openAfterFocus;
+			var isOpen = this.state.isOpen || this._openAfterFocus || this.props.openOnFocus;
 			if (this.props.onFocus) {
 				this.props.onFocus(event);
 			}
@@ -29935,7 +29955,8 @@
 		},
 
 		handleInputBlur: function handleInputBlur(event) {
-			if (this.refs.menu && document.activeElement.isEqualNode(this.refs.menu)) {
+			if (this.refs.menu && document.activeElement === this.refs.menu) {
+				this.focus();
 				return;
 			}
 
@@ -29954,10 +29975,18 @@
 		},
 
 		handleInputChange: function handleInputChange(event) {
+			var newInputValue = event.target.value;
+			if (this.state.inputValue !== event.target.value && this.props.onInputChange) {
+				var nextState = this.props.onInputChange(newInputValue);
+				// Note: != used deliberately here to catch undefined and null
+				if (nextState != null) {
+					newInputValue = '' + nextState;
+				}
+			}
 			this.setState({
 				isOpen: true,
 				isPseudoFocused: false,
-				inputValue: event.target.value
+				inputValue: newInputValue
 			});
 		},
 
@@ -29973,7 +30002,7 @@
 					return;
 				case 9:
 					// tab
-					if (event.shiftKey || !this.state.isOpen) {
+					if (event.shiftKey || !this.state.isOpen || !this.props.tabSelectsValue) {
 						return;
 					}
 					this.selectFocusedOption();
@@ -30038,8 +30067,7 @@
 			return op[this.props.labelKey];
 		},
 
-		getValueArray: function getValueArray() {
-			var value = this.props.value;
+		getValueArray: function getValueArray(value) {
 			if (this.props.multi) {
 				if (typeof value === 'string') value = value.split(this.props.delimiter);
 				if (!Array.isArray(value)) {
@@ -30103,19 +30131,19 @@
 		},
 
 		addValue: function addValue(value) {
-			var valueArray = this.getValueArray();
+			var valueArray = this.getValueArray(this.props.value);
 			this.setValue(valueArray.concat(value));
 		},
 
 		popValue: function popValue() {
-			var valueArray = this.getValueArray();
+			var valueArray = this.getValueArray(this.props.value);
 			if (!valueArray.length) return;
 			if (valueArray[valueArray.length - 1].clearableValue === false) return;
 			this.setValue(valueArray.slice(0, valueArray.length - 1));
 		},
 
 		removeValue: function removeValue(value) {
-			var valueArray = this.getValueArray();
+			var valueArray = this.getValueArray(this.props.value);
 			this.setValue(valueArray.filter(function (i) {
 				return i !== value;
 			}));
@@ -30130,7 +30158,7 @@
 			}
 			event.stopPropagation();
 			event.preventDefault();
-			this.setValue(null);
+			this.setValue(this.props.resetValue);
 			this.setState({
 				isOpen: false,
 				inputValue: ''
@@ -30247,42 +30275,46 @@
 		},
 
 		renderInput: function renderInput(valueArray) {
-			var className = (0, _classnames2['default'])('Select-input', this.props.inputProps.className);
-			if (this.props.disabled || !this.props.searchable) {
-				return _react2['default'].createElement('div', _extends({}, this.props.inputProps, {
-					className: className,
-					tabIndex: this.props.tabIndex || 0,
-					onBlur: this.handleInputBlur,
-					onFocus: this.handleInputFocus,
-					ref: 'input',
-					style: { border: 0, width: 1, display: 'inline-block' } }));
+			if (this.props.inputRenderer) {
+				return this.props.inputRenderer();
+			} else {
+				var className = (0, _classnames2['default'])('Select-input', this.props.inputProps.className);
+				if (this.props.disabled || !this.props.searchable) {
+					return _react2['default'].createElement('div', _extends({}, this.props.inputProps, {
+						className: className,
+						tabIndex: this.props.tabIndex || 0,
+						onBlur: this.handleInputBlur,
+						onFocus: this.handleInputFocus,
+						ref: 'input',
+						style: { border: 0, width: 1, display: 'inline-block' } }));
+				}
+				if (this.props.autosize) {
+					return _react2['default'].createElement(_reactInputAutosize2['default'], _extends({}, this.props.inputProps, {
+						className: className,
+						tabIndex: this.props.tabIndex,
+						onBlur: this.handleInputBlur,
+						onChange: this.handleInputChange,
+						onFocus: this.handleInputFocus,
+						minWidth: '5',
+						ref: 'input',
+						required: this.state.required,
+						value: this.state.inputValue
+					}));
+				}
+				return _react2['default'].createElement(
+					'div',
+					{ className: className },
+					_react2['default'].createElement('input', _extends({}, this.props.inputProps, {
+						tabIndex: this.props.tabIndex,
+						onBlur: this.handleInputBlur,
+						onChange: this.handleInputChange,
+						onFocus: this.handleInputFocus,
+						ref: 'input',
+						required: this.state.required,
+						value: this.state.inputValue
+					}))
+				);
 			}
-			if (this.props.autosize) {
-				return _react2['default'].createElement(_reactInputAutosize2['default'], _extends({}, this.props.inputProps, {
-					className: className,
-					tabIndex: this.props.tabIndex,
-					onBlur: this.handleInputBlur,
-					onChange: this.handleInputChange,
-					onFocus: this.handleInputFocus,
-					minWidth: '5',
-					ref: 'input',
-					required: this.state.required,
-					value: this.state.inputValue
-				}));
-			}
-			return _react2['default'].createElement(
-				'div',
-				{ className: className },
-				_react2['default'].createElement('input', _extends({}, this.props.inputProps, {
-					tabIndex: this.props.tabIndex,
-					onBlur: this.handleInputBlur,
-					onChange: this.handleInputChange,
-					onFocus: this.handleInputFocus,
-					ref: 'input',
-					required: this.state.required,
-					value: this.state.inputValue
-				}))
-			);
 		},
 
 		renderClear: function renderClear() {
@@ -30442,14 +30474,35 @@
 			}
 		},
 
+		renderOuter: function renderOuter(options, valueArray, focusedOption) {
+			var menu = this.renderMenu(options, valueArray, focusedOption);
+			if (!menu) {
+				return null;
+			}
+
+			return _react2['default'].createElement(
+				'div',
+				{ ref: 'menuContainer', className: 'Select-menu-outer', style: this.props.menuContainerStyle },
+				_react2['default'].createElement(
+					'div',
+					{ ref: 'menu', className: 'Select-menu',
+						style: this.props.menuStyle,
+						onScroll: this.handleMenuScroll,
+						onMouseDown: this.handleMouseDownOnMenu },
+					menu
+				)
+			);
+		},
+
 		render: function render() {
-			var valueArray = this.getValueArray();
+			var valueArray = this.getValueArray(this.props.value);
 			var options = this._visibleOptions = this.filterOptions(this.props.multi ? valueArray : null);
 			var isOpen = this.state.isOpen;
 			if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
 			var focusedOption = this._focusedOption = this.getFocusableOption(valueArray[0]);
 			var className = (0, _classnames2['default'])('Select', this.props.className, {
 				'Select--multi': this.props.multi,
+				'Select--single': !this.props.multi,
 				'is-disabled': this.props.disabled,
 				'is-focused': this.state.isFocused,
 				'is-loading': this.props.isLoading,
@@ -30458,6 +30511,7 @@
 				'is-searchable': this.props.searchable,
 				'has-value': valueArray.length
 			});
+
 			return _react2['default'].createElement(
 				'div',
 				{ ref: 'wrapper', className: className, style: this.props.wrapperStyle },
@@ -30478,18 +30532,7 @@
 					this.renderClear(),
 					this.renderArrow()
 				),
-				isOpen ? _react2['default'].createElement(
-					'div',
-					{ ref: 'menuContainer', className: 'Select-menu-outer', style: this.props.menuContainerStyle },
-					_react2['default'].createElement(
-						'div',
-						{ ref: 'menu', className: 'Select-menu',
-							style: this.props.menuStyle,
-							onScroll: this.handleMenuScroll,
-							onMouseDown: this.handleMouseDownOnMenu },
-						this.renderMenu(options, !this.props.multi ? valueArray : null, focusedOption)
-					)
-				) : null
+				isOpen ? this.renderOuter(options, !this.props.multi ? valueArray : null, focusedOption) : null
 			);
 		}
 
@@ -30545,13 +30588,16 @@
 			this.updateInputWidth();
 		},
 		componentDidUpdate: function componentDidUpdate() {
-			this.queueUpdateInputWidth();
+			this.updateInputWidth();
 		},
 		copyInputStyles: function copyInputStyles() {
 			if (!this.isMounted() || !window.getComputedStyle) {
 				return;
 			}
 			var inputStyle = window.getComputedStyle(this.refs.input);
+			if (!inputStyle) {
+				return;
+			}
 			var widthNode = this.refs.sizer;
 			widthNode.style.fontSize = inputStyle.fontSize;
 			widthNode.style.fontFamily = inputStyle.fontFamily;
@@ -30566,9 +30612,6 @@
 				placeholderNode.style.fontStyle = inputStyle.fontStyle;
 				placeholderNode.style.letterSpacing = inputStyle.letterSpacing;
 			}
-		},
-		queueUpdateInputWidth: function queueUpdateInputWidth() {
-			nextFrame(this.updateInputWidth);
 		},
 		updateInputWidth: function updateInputWidth() {
 			if (!this.isMounted() || typeof this.refs.sizer.scrollWidth === 'undefined') {
@@ -30766,7 +30809,8 @@
 			loadOptions: _react2['default'].PropTypes.func.isRequired, // function to call to load options asynchronously
 			loadingPlaceholder: _react2['default'].PropTypes.string, // replaces the placeholder while options are loading
 			minimumInput: _react2['default'].PropTypes.number, // the minimum number of characters that trigger loadOptions
-			noResultsText: _react2['default'].PropTypes.string, // placeholder displayed when there are no matching search results (shared with Select)
+			noResultsText: stringOrNode, // placeholder displayed when there are no matching search results (shared with Select)
+			onInputChange: _react2['default'].PropTypes.func, // onInputChange handler: function (inputValue) {}
 			placeholder: stringOrNode, // field placeholder, displayed when there's no value (shared with Select)
 			searchPromptText: _react2['default'].PropTypes.string, // label to prompt for search input
 			searchingText: _react2['default'].PropTypes.string },
@@ -30828,6 +30872,13 @@
 			};
 		},
 		loadOptions: function loadOptions(input) {
+			if (this.props.onInputChange) {
+				var nextState = this.props.onInputChange(input);
+				// Note: != used deliberately here to catch undefined and null
+				if (nextState != null) {
+					input = '' + nextState;
+				}
+			}
 			if (this.props.ignoreAccents) input = (0, _utilsStripDiacritics2['default'])(input);
 			if (this.props.ignoreCase) input = input.toLowerCase();
 			this._lastInput = input;
@@ -31093,115 +31144,80 @@
 /* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function($) {var d3 = __webpack_require__(172);
+	/* WEBPACK VAR INJECTION */(function($) {var d3 = __webpack_require__(168);
 
 	module.exports = {
-	     generateChart: function (data, type, city) {
-	          $("#chart").empty();
+	    generateChart: function (data, type) {
+	        $('#weatherChart').empty();
 
-	          var HEIGHT = 500,
-	              WIDTH = 750,
-	              PADDING = 50;
+	        // Set margins
+	        var margin = { top: 20, right: 20, bottom: 40, left: 40 },
+	            width = 600 - margin.right - margin.left,
+	            height = 400 - margin.top - margin.bottom;
 
-	          // Select and size the svg element
-	          var svg = d3.select("svg").attr("height", HEIGHT + "px").attr("width", WIDTH + "px");
+	        // Select and size the svg element
+	        var svg = d3.select('div#weatherChart').attr('class', 'svg-container').append('svg').attr('viewBox', '0 0 ' + (width + margin.left + margin.right) + ' ' + (height + margin.top + margin.bottom)).attr('class', 'svg-content-responsive').append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-	          // Get an array of max and min temperatures for each day in
-	          // the 4-day forecast
-	          var data = data.hourly_forecast.map(function (entry) {
-	               var format = d3.time.format("%Y-%m-%d-%H");
-	               var time = entry.FCTTIME;
+	        // Get an array of max and min temperatures for each day in
+	        // the 4-day forecast
+	        var tempData = data.hourly_forecast.map(function (entry) {
+	            var format = d3.time.format('%Y-%m-%d-%H');
+	            var time = entry.FCTTIME;
 
-	               var prettyTime = format.parse(time.year + "-" + time.mon_padded + "-" + time.mday + "-" + time.hour);
-	               return {
-	                    time: prettyTime,
-	                    temp: type == "english" ? entry.temp.english : entry.temp.metric
-	               };
-	          });
+	            var prettyTime = format.parse(time.year + '-' + time.mon_padded + '-' + time.mday + '-' + time.hour);
+	            return {
+	                time: prettyTime,
+	                temp: type == 'english' ? entry.temp.english : entry.temp.metric
+	            };
+	        });
+	        temps = tempData.slice(0, 72);
+	        recordHigh = data.almanac.temp_high.record.C;
+	        recordLow = data.almanac.temp_low.record.C;
 
-	          var x = d3.time.scale().domain([data[0].time, data.slice(-1)[0].time]).range([PADDING, WIDTH - PADDING]);
+	        var xScale = d3.time.scale().domain([temps[0].time, temps.slice(-1)[0].time]).range([0, width]);
 
-	          var y = d3.scale.linear().domain([d3.min(data, function (d) {
-	               return parseInt(d.temp);
-	          }), d3.max(data, function (d) {
-	               return parseInt(d.temp);
-	          })]).range([HEIGHT - PADDING - 10, PADDING]);
+	        var yScale = d3.scale.linear().domain([d3.min(temps, function (d) {
+	            return parseInt(d.temp) - 15;
+	        }), d3.max(temps, function (d) {
+	            return parseInt(d.temp) + 15;
+	        })]).range([height, 0]);
 
-	          var lineGen = d3.svg.line().x(function (d) {
-	               return x(d.time);
-	          }).y(function (d) {
-	               return y(d.temp);
-	          });
+	        // Line generator function
+	        var lineGen = d3.svg.line().x(function (d) {
+	            return xScale(d.time);
+	        }).y(function (d) {
+	            return yScale(d.temp);
+	        });
 
-	          svg.append("path").attr("d", lineGen(data)).attr("stroke", "black").attr("stroke-width", 2).attr("fill", "none");
+	        // Create axis templates
+	        var xAxisHours = d3.svg.axis().scale(xScale).orient('bottom').tickFormat(d3.time.format('%Hh')).ticks(10);
 
-	          var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format("%Hh %a")).ticks(10);
+	        var xAxisDays = d3.svg.axis().scale(xScale).orient('bottom').tickFormat(d3.time.format('%A')).ticks(3);
 
-	          var yAxis = d3.svg.axis().scale(y).orient("left");
+	        var yAxis = d3.svg.axis().scale(yScale).orient('left');
 
-	          // Append tooltip
-	          var focus = svg.append("g");
+	        // Append axes
+	        svg.append('g').attr('class', 'axis').attr('transform', 'translate(0, ' + height + ')').call(xAxisHours);
 
-	          // Append a dashed line to the x axis
-	          focus.append("line").attr("class", "x-line").style("stroke", "black").style("stroke-dasharray", "3.3").style("opacity", 0.5).attr("y1", 0).attr("y2", HEIGHT);
+	        svg.append('g').attr('class', 'dayLabels').attr('transform', 'translate(0,' + (height + 20) + ')').call(xAxisDays);
 
-	          // Append a dashed line to the y axis
-	          focus.append("line").attr("class", "y-line").style("stroke", "black").style("stroke-dasharray", "3.3").style("opacity", 0.5).attr("x1", WIDTH).attr("x2", WIDTH);
+	        svg.append('g').attr('class', 'axis').call(yAxis).append('text').attr('class', 'label').attr('text-anchor', 'end').attr('transform', 'rotate(-90)').attr('y', -30).text('Temperature (Celsius)');
 
-	          // Append the circle at the intersection
-	          focus.append("circle").attr("class", "y").style("fill", "none").style("stroke", "black").attr("r", 5);
+	        // Append box showing temperature ranges
+	        svg.append('rect').style('fill', 'lightgrey').style('opacity', '0.3').attr('x', 0).attr('y', yScale(recordHigh)).attr('width', width).attr('height', Math.abs(yScale(recordHigh) - yScale(recordLow)));
 
-	          // Place a tooltip w/ the budget at the intersection
-	          focus.append("text").attr("class", "y1").style("stroke", "white").style("stroke-width", "3.5px").style("opacity", 0.8).attr("dx", 8).attr("dy", "-.3em");
-	          focus.append("text").attr("class", "y2").attr("dx", 8).attr("dy", "-.3em");
+	        // Append line bounds and labels to box
+	        svg.append('line').attr('class', 'boundLine').style("stroke", "black").style("stroke-dasharray", "3.3").style("opacity", 0.5).attr('x1', 0).attr('x2', width).attr('y1', yScale(recordLow)).attr('y2', yScale(recordLow));
 
-	          // Place a tooltip w/ the year at the intersection
-	          focus.append("text").attr("class", "y3").style("stroke", "white").style("stroke-width", "3.5px").style("opacity", 0.8).attr("dx", 8).attr("dy", "1em");
-	          focus.append("text").attr("class", "y4").attr("dx", 8).attr("dy", "1em");
+	        svg.append('line').attr('class', 'boundLine').style("stroke", "black").style("stroke-dasharray", "3.3").style("opacity", 0.5).attr('x1', 0).attr('x2', width).attr('y1', yScale(recordHigh)).attr('y2', yScale(recordHigh));
 
-	          // Append a rectangle to capture the mouse
-	          svg.append("rect").attr("width", WIDTH).attr("height", HEIGHT).style("fill", "none").style("pointer-events", "all").on("mouseover", function () {
-	               focus.style("display", null);
-	          }).on("mouseout", function () {
-	               focus.style("display", "none");
-	          }).on("mousemove", mousemove);
+	        svg.append('text').style('stroke', 'black').attr('class', 'label').attr('dx', 3).attr('dy', yScale(recordLow) - 5).text('Record low');
 
-	          function mousemove() {
-	               // Get value of input domain for output range at mouse position
-	               var x0 = x.invert(d3.mouse(this)[0]);
-	               bisectTime = d3.bisector(function (d) {
-	                    return d.time;
-	               }).left;
-	               var i = bisectTime(data, x0, 1),
-	                   d0 = data[i - 1],
-	                   d1 = data[i],
-	                   d = x0 - d0.time > d1.time - x0 ? d1 : d0;
+	        svg.append('text').style('stroke', 'black').attr('class', 'label').attr('dx', 3).attr('dy', yScale(recordHigh) - 5).text('Record high');
 
-	               focus.select("circle.y").attr("transform", "translate(" + x(d.time) + "," + y(d.temp) + ")");
-
-	               focus.select("text.y1").attr("transform", "translate(" + x(d.time) + "," + y(d.temp) + ")").text(d.temp + "C");
-
-	               focus.select("text.y2").attr("transform", "translate(" + x(d.time) + "," + y(d.temp) + ")").text(d.temp + "C");
-
-	               focus.select("text.y3").attr("transform", "translate(" + x(d.time) + "," + y(d.temp) + ")").text(d3.time.format("%Hh %a")(d.time));
-
-	               focus.select("text.y4").attr("transform", "translate(" + x(d.time) + "," + y(d.temp) + ")").text(d3.time.format("%Hh %a")(d.time));
-
-	               focus.select(".x-line").attr("transform", "translate(" + x(d.time) + "," + y(d.temp) + ")").attr("y2", HEIGHT - y(d.temp));
-
-	               focus.select(".y-line").attr("transform", "translate(" + WIDTH * -1 + "," + y(d.temp) + ")").attr("x2", WIDTH + WIDTH);
-	          }
-
-	          svg.append("g").attr("class", "axis").attr("transform", "translate(0, " + (HEIGHT - PADDING) + ")").call(xAxis);
-
-	          svg.append("g").attr("class", "axis").attr("transform", "translate(" + PADDING + ", 0)").call(yAxis);
-
-	          svg.append("text").attr("class", "label").attr("text-anchor", "end").attr("x", WIDTH - PADDING).attr("y", HEIGHT - 20).text("Hour");
-
-	          svg.append("text").attr("transform", "rotate(-90)").attr("class", "label").attr("text-anchor", "end").attr("x", -PADDING).attr("y", 10).text("Degrees Celsius");
-
-	          svg.append("text").attr("class", "title").attr("text-anchor", "middle").attr("x", WIDTH / 2).attr("y", 25).text("Hourly forecast for " + city);
-	     }
+	        // Append line graph of temperature
+	        svg.append('path').attr('d', lineGen(temps)).attr('stroke', '#660033').attr('stroke-width', 2).attr('fill', 'none');
+	    }
 	};
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
@@ -31209,357 +31225,9 @@
 /* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(169);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(171)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../../css-loader/index.js!./react-select.min.css", function() {
-				var newContent = require("!!./../../css-loader/index.js!./react-select.min.css");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 169 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(170)();
-	// imports
-
-
-	// module
-	exports.push([module.id, ".Select,.Select-control{position:relative}.Select-arrow-zone,.Select-clear-zone,.Select-loading-zone{text-align:center;cursor:pointer}.Select,.Select div,.Select input,.Select span{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.Select.is-disabled>.Select-control{background-color:#f9f9f9}.Select.is-disabled>.Select-control:hover{box-shadow:none}.Select.is-disabled .Select-arrow-zone{cursor:default;pointer-events:none}.Select-control{background-color:#fff;border-radius:4px;border:1px solid #ccc;color:#333;cursor:default;display:table;height:36px;outline:0;overflow:hidden;width:100%}.is-searchable.is-focused:not(.is-open)>.Select-control,.is-searchable.is-open>.Select-control{cursor:text}.Select-control:hover{box-shadow:0 1px 0 rgba(0,0,0,.06)}.is-open>.Select-control{border-bottom-right-radius:0;border-bottom-left-radius:0;background:#fff;border-color:#b3b3b3 #ccc #d9d9d9}.is-open>.Select-control>.Select-arrow{border-color:transparent transparent #999;border-width:0 5px 5px}.is-focused:not(.is-open)>.Select-control{border-color:#007eff;box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 0 3px rgba(0,126,255,.1)}.Select-placeholder,:not(.Select--multi)>.Select-control .Select-value{bottom:0;color:#aaa;left:0;line-height:34px;padding-left:10px;padding-right:10px;position:absolute;right:0;top:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.has-value.is-pseudo-focused:not(.Select--multi)>.Select-control>.Select-value .Select-value-label,.has-value:not(.Select--multi)>.Select-control>.Select-value .Select-value-label{color:#333}.has-value.is-pseudo-focused:not(.Select--multi)>.Select-control>.Select-value a.Select-value-label,.has-value:not(.Select--multi)>.Select-control>.Select-value a.Select-value-label{cursor:pointer;text-decoration:none}.has-value.is-pseudo-focused:not(.Select--multi)>.Select-control>.Select-value a.Select-value-label:focus,.has-value.is-pseudo-focused:not(.Select--multi)>.Select-control>.Select-value a.Select-value-label:hover,.has-value:not(.Select--multi)>.Select-control>.Select-value a.Select-value-label:focus,.has-value:not(.Select--multi)>.Select-control>.Select-value a.Select-value-label:hover{color:#007eff;outline:0;text-decoration:underline}.Select-input{height:34px;padding-left:10px;padding-right:10px;vertical-align:middle}.Select-input>input{width:100%;background:none;border:0;box-shadow:none;cursor:default;display:inline-block;font-family:inherit;font-size:inherit;height:34px;margin:0;outline:0;padding:0;-webkit-appearance:none}.Select-loading,.Select-loading-zone{width:16px;position:relative;vertical-align:middle}.is-focused .Select-input>input{cursor:text}.has-value.is-pseudo-focused .Select-input{opacity:0}.Select-control:not(.is-searchable)>.Select-input{outline:0}.Select-loading-zone{display:table-cell}.Select-loading{-webkit-animation:Select-animation-spin .4s infinite linear;-o-animation:Select-animation-spin .4s infinite linear;animation:Select-animation-spin .4s infinite linear;height:16px;box-sizing:border-box;border-radius:50%;border:2px solid #ccc;border-right-color:#333;display:inline-block}.Select-clear-zone{-webkit-animation:Select-animation-fadeIn .2s;-o-animation:Select-animation-fadeIn .2s;animation:Select-animation-fadeIn .2s;color:#999;display:table-cell;position:relative;vertical-align:middle;width:17px}.Select-clear-zone:hover{color:#D0021B}.Select-clear{display:inline-block;font-size:18px;line-height:1}.Select--multi .Select-clear-zone{width:17px}.Select-arrow-zone{display:table-cell;position:relative;vertical-align:middle;width:25px;padding-right:5px}.Select-arrow{border-color:#999 transparent transparent;border-style:solid;border-width:5px 5px 2.5px;display:inline-block;height:0;width:0}.Select-noresults,.Select-option{box-sizing:border-box;display:block;padding:8px 10px}.Select-arrow-zone:hover>.Select-arrow,.is-open .Select-arrow{border-top-color:#666}@-webkit-keyframes Select-animation-fadeIn{from{opacity:0}to{opacity:1}}@keyframes Select-animation-fadeIn{from{opacity:0}to{opacity:1}}.Select-menu-outer{border-bottom-right-radius:4px;border-bottom-left-radius:4px;background-color:#fff;border:1px solid #ccc;border-top-color:#e6e6e6;box-shadow:0 1px 0 rgba(0,0,0,.06);box-sizing:border-box;margin-top:-1px;max-height:200px;position:absolute;top:100%;width:100%;z-index:1;-webkit-overflow-scrolling:touch}.Select-menu{max-height:198px;overflow-y:auto}.Select-option{background-color:#fff;color:#666;cursor:pointer}.Select-option:last-child{border-bottom-right-radius:4px;border-bottom-left-radius:4px}.Select-option.is-focused{background-color:rgba(0,126,255,.08);color:#333}.Select-option.is-disabled{color:#ccc;cursor:default}.Select-noresults{color:#999;cursor:default}.Select--multi .Select-input{vertical-align:middle;margin-left:10px;padding:0}.Select--multi.has-value .Select-input{margin-left:5px}.Select--multi .Select-value{background-color:rgba(0,126,255,.08);border-radius:2px;border:1px solid rgba(0,126,255,.24);color:#007eff;display:inline-block;font-size:.9em;line-height:1.4;margin-left:5px;margin-top:5px;vertical-align:top}.Select--multi .Select-value-icon,.Select--multi .Select-value-label{display:inline-block;vertical-align:middle}.Select--multi .Select-value-label{border-bottom-right-radius:2px;border-top-right-radius:2px;cursor:default;padding:2px 5px}.Select--multi a.Select-value-label{color:#007eff;cursor:pointer;text-decoration:none}.Select--multi a.Select-value-label:hover{text-decoration:underline}.Select--multi .Select-value-icon{cursor:pointer;border-bottom-left-radius:2px;border-top-left-radius:2px;border-right:1px solid rgba(0,126,255,.24);padding:1px 5px 3px}.Select--multi .Select-value-icon:focus,.Select--multi .Select-value-icon:hover{background-color:rgba(0,113,230,.08);color:#0071e6}.Select--multi .Select-value-icon:active{background-color:rgba(0,126,255,.24)}.Select--multi.is-disabled .Select-value{background-color:#fcfcfc;border:1px solid #e3e3e3;color:#333}.Select--multi.is-disabled .Select-value-icon{cursor:not-allowed;border-right:1px solid #e3e3e3}.Select--multi.is-disabled .Select-value-icon:active,.Select--multi.is-disabled .Select-value-icon:focus,.Select--multi.is-disabled .Select-value-icon:hover{background-color:#fcfcfc}@keyframes Select-animation-spin{to{transform:rotate(1turn)}}@-webkit-keyframes Select-animation-spin{to{-webkit-transform:rotate(1turn)}}", ""]);
-
-	// exports
-
-
-/***/ },
-/* 170 */
-/***/ function(module, exports) {
-
-	/*
-		MIT License http://www.opensource.org/licenses/mit-license.php
-		Author Tobias Koppers @sokra
-	*/
-	// css base code, injected by the css-loader
-	module.exports = function() {
-		var list = [];
-
-		// return the list of modules as css string
-		list.toString = function toString() {
-			var result = [];
-			for(var i = 0; i < this.length; i++) {
-				var item = this[i];
-				if(item[2]) {
-					result.push("@media " + item[2] + "{" + item[1] + "}");
-				} else {
-					result.push(item[1]);
-				}
-			}
-			return result.join("");
-		};
-
-		// import a list of modules into the list
-		list.i = function(modules, mediaQuery) {
-			if(typeof modules === "string")
-				modules = [[null, modules, ""]];
-			var alreadyImportedModules = {};
-			for(var i = 0; i < this.length; i++) {
-				var id = this[i][0];
-				if(typeof id === "number")
-					alreadyImportedModules[id] = true;
-			}
-			for(i = 0; i < modules.length; i++) {
-				var item = modules[i];
-				// skip already imported module
-				// this implementation is not 100% perfect for weird media query combinations
-				//  when a module is imported multiple times with different media queries.
-				//  I hope this will never occur (Hey this way we have smaller bundles)
-				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-					if(mediaQuery && !item[2]) {
-						item[2] = mediaQuery;
-					} else if(mediaQuery) {
-						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-					}
-					list.push(item);
-				}
-			}
-		};
-		return list;
-	};
-
-
-/***/ },
-/* 171 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*
-		MIT License http://www.opensource.org/licenses/mit-license.php
-		Author Tobias Koppers @sokra
-	*/
-	var stylesInDom = {},
-		memoize = function(fn) {
-			var memo;
-			return function () {
-				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
-				return memo;
-			};
-		},
-		isOldIE = memoize(function() {
-			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
-		}),
-		getHeadElement = memoize(function () {
-			return document.head || document.getElementsByTagName("head")[0];
-		}),
-		singletonElement = null,
-		singletonCounter = 0,
-		styleElementsInsertedAtTop = [];
-
-	module.exports = function(list, options) {
-		if(false) {
-			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
-		}
-
-		options = options || {};
-		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-		// tags it will allow on a page
-		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
-
-		// By default, add <style> tags to the bottom of <head>.
-		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
-
-		var styles = listToStyles(list);
-		addStylesToDom(styles, options);
-
-		return function update(newList) {
-			var mayRemove = [];
-			for(var i = 0; i < styles.length; i++) {
-				var item = styles[i];
-				var domStyle = stylesInDom[item.id];
-				domStyle.refs--;
-				mayRemove.push(domStyle);
-			}
-			if(newList) {
-				var newStyles = listToStyles(newList);
-				addStylesToDom(newStyles, options);
-			}
-			for(var i = 0; i < mayRemove.length; i++) {
-				var domStyle = mayRemove[i];
-				if(domStyle.refs === 0) {
-					for(var j = 0; j < domStyle.parts.length; j++)
-						domStyle.parts[j]();
-					delete stylesInDom[domStyle.id];
-				}
-			}
-		};
-	}
-
-	function addStylesToDom(styles, options) {
-		for(var i = 0; i < styles.length; i++) {
-			var item = styles[i];
-			var domStyle = stylesInDom[item.id];
-			if(domStyle) {
-				domStyle.refs++;
-				for(var j = 0; j < domStyle.parts.length; j++) {
-					domStyle.parts[j](item.parts[j]);
-				}
-				for(; j < item.parts.length; j++) {
-					domStyle.parts.push(addStyle(item.parts[j], options));
-				}
-			} else {
-				var parts = [];
-				for(var j = 0; j < item.parts.length; j++) {
-					parts.push(addStyle(item.parts[j], options));
-				}
-				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
-			}
-		}
-	}
-
-	function listToStyles(list) {
-		var styles = [];
-		var newStyles = {};
-		for(var i = 0; i < list.length; i++) {
-			var item = list[i];
-			var id = item[0];
-			var css = item[1];
-			var media = item[2];
-			var sourceMap = item[3];
-			var part = {css: css, media: media, sourceMap: sourceMap};
-			if(!newStyles[id])
-				styles.push(newStyles[id] = {id: id, parts: [part]});
-			else
-				newStyles[id].parts.push(part);
-		}
-		return styles;
-	}
-
-	function insertStyleElement(options, styleElement) {
-		var head = getHeadElement();
-		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
-		if (options.insertAt === "top") {
-			if(!lastStyleElementInsertedAtTop) {
-				head.insertBefore(styleElement, head.firstChild);
-			} else if(lastStyleElementInsertedAtTop.nextSibling) {
-				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
-			} else {
-				head.appendChild(styleElement);
-			}
-			styleElementsInsertedAtTop.push(styleElement);
-		} else if (options.insertAt === "bottom") {
-			head.appendChild(styleElement);
-		} else {
-			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
-		}
-	}
-
-	function removeStyleElement(styleElement) {
-		styleElement.parentNode.removeChild(styleElement);
-		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
-		if(idx >= 0) {
-			styleElementsInsertedAtTop.splice(idx, 1);
-		}
-	}
-
-	function createStyleElement(options) {
-		var styleElement = document.createElement("style");
-		styleElement.type = "text/css";
-		insertStyleElement(options, styleElement);
-		return styleElement;
-	}
-
-	function createLinkElement(options) {
-		var linkElement = document.createElement("link");
-		linkElement.rel = "stylesheet";
-		insertStyleElement(options, linkElement);
-		return linkElement;
-	}
-
-	function addStyle(obj, options) {
-		var styleElement, update, remove;
-
-		if (options.singleton) {
-			var styleIndex = singletonCounter++;
-			styleElement = singletonElement || (singletonElement = createStyleElement(options));
-			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
-			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
-		} else if(obj.sourceMap &&
-			typeof URL === "function" &&
-			typeof URL.createObjectURL === "function" &&
-			typeof URL.revokeObjectURL === "function" &&
-			typeof Blob === "function" &&
-			typeof btoa === "function") {
-			styleElement = createLinkElement(options);
-			update = updateLink.bind(null, styleElement);
-			remove = function() {
-				removeStyleElement(styleElement);
-				if(styleElement.href)
-					URL.revokeObjectURL(styleElement.href);
-			};
-		} else {
-			styleElement = createStyleElement(options);
-			update = applyToTag.bind(null, styleElement);
-			remove = function() {
-				removeStyleElement(styleElement);
-			};
-		}
-
-		update(obj);
-
-		return function updateStyle(newObj) {
-			if(newObj) {
-				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
-					return;
-				update(obj = newObj);
-			} else {
-				remove();
-			}
-		};
-	}
-
-	var replaceText = (function () {
-		var textStore = [];
-
-		return function (index, replacement) {
-			textStore[index] = replacement;
-			return textStore.filter(Boolean).join('\n');
-		};
-	})();
-
-	function applyToSingletonTag(styleElement, index, remove, obj) {
-		var css = remove ? "" : obj.css;
-
-		if (styleElement.styleSheet) {
-			styleElement.styleSheet.cssText = replaceText(index, css);
-		} else {
-			var cssNode = document.createTextNode(css);
-			var childNodes = styleElement.childNodes;
-			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
-			if (childNodes.length) {
-				styleElement.insertBefore(cssNode, childNodes[index]);
-			} else {
-				styleElement.appendChild(cssNode);
-			}
-		}
-	}
-
-	function applyToTag(styleElement, obj) {
-		var css = obj.css;
-		var media = obj.media;
-
-		if(media) {
-			styleElement.setAttribute("media", media)
-		}
-
-		if(styleElement.styleSheet) {
-			styleElement.styleSheet.cssText = css;
-		} else {
-			while(styleElement.firstChild) {
-				styleElement.removeChild(styleElement.firstChild);
-			}
-			styleElement.appendChild(document.createTextNode(css));
-		}
-	}
-
-	function updateLink(linkElement, obj) {
-		var css = obj.css;
-		var sourceMap = obj.sourceMap;
-
-		if(sourceMap) {
-			// http://stackoverflow.com/a/26603875
-			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
-		}
-
-		var blob = new Blob([css], { type: "text/css" });
-
-		var oldSrc = linkElement.href;
-
-		linkElement.href = URL.createObjectURL(blob);
-
-		if(oldSrc)
-			URL.revokeObjectURL(oldSrc);
-	}
-
-
-/***/ },
-/* 172 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function() {
 	  var d3 = {
-	    version: "3.5.16"
+	    version: "3.5.17"
 	  };
 	  var d3_arraySlice = [].slice, d3_array = function(list) {
 	    return d3_arraySlice.call(list);
@@ -35084,7 +34752,7 @@
 	        λ0 = λ, sinφ0 = sinφ, cosφ0 = cosφ, point0 = point;
 	      }
 	    }
-	    return (polarAngle < -ε || polarAngle < ε && d3_geo_areaRingSum < 0) ^ winding & 1;
+	    return (polarAngle < -ε || polarAngle < ε && d3_geo_areaRingSum < -ε) ^ winding & 1;
 	  }
 	  function d3_geo_clipCircle(radius) {
 	    var cr = Math.cos(radius), smallRadius = cr > 0, notHemisphere = abs(cr) > ε, interpolate = d3_geo_circleInterpolate(radius, 6 * d3_radians);
@@ -41111,6 +40779,354 @@
 	  });
 	  if (true) this.d3 = d3, !(__WEBPACK_AMD_DEFINE_FACTORY__ = (d3), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)); else if (typeof module === "object" && module.exports) module.exports = d3; else this.d3 = d3;
 	}();
+
+/***/ },
+/* 169 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(170);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(172)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../css-loader/index.js!./react-select.min.css", function() {
+				var newContent = require("!!./../../css-loader/index.js!./react-select.min.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 170 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(171)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".Select,.Select-control{position:relative}.Select-arrow-zone,.Select-clear-zone,.Select-loading-zone{text-align:center;cursor:pointer}.Select,.Select div,.Select input,.Select span{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.Select.is-disabled>.Select-control{background-color:#f9f9f9}.Select.is-disabled>.Select-control:hover{box-shadow:none}.Select.is-disabled .Select-arrow-zone{cursor:default;pointer-events:none}.Select-control{background-color:#fff;border-radius:4px;border:1px solid #ccc;color:#333;cursor:default;display:table;height:36px;outline:0;overflow:hidden;width:100%}.is-searchable.is-focused:not(.is-open)>.Select-control,.is-searchable.is-open>.Select-control{cursor:text}.Select-control:hover{box-shadow:0 1px 0 rgba(0,0,0,.06)}.is-open>.Select-control{border-bottom-right-radius:0;border-bottom-left-radius:0;background:#fff;border-color:#b3b3b3 #ccc #d9d9d9}.is-open>.Select-control>.Select-arrow{border-color:transparent transparent #999;border-width:0 5px 5px}.is-focused:not(.is-open)>.Select-control{border-color:#007eff;box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 0 3px rgba(0,126,255,.1)}.Select--single>.Select-control .Select-value,.Select-placeholder{bottom:0;color:#aaa;left:0;line-height:34px;padding-left:10px;padding-right:10px;position:absolute;right:0;top:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.has-value.Select--single>.Select-control>.Select-value .Select-value-label,.has-value.is-pseudo-focused.Select--single>.Select-control>.Select-value .Select-value-label{color:#333}.has-value.Select--single>.Select-control>.Select-value a.Select-value-label,.has-value.is-pseudo-focused.Select--single>.Select-control>.Select-value a.Select-value-label{cursor:pointer;text-decoration:none}.has-value.Select--single>.Select-control>.Select-value a.Select-value-label:focus,.has-value.Select--single>.Select-control>.Select-value a.Select-value-label:hover,.has-value.is-pseudo-focused.Select--single>.Select-control>.Select-value a.Select-value-label:focus,.has-value.is-pseudo-focused.Select--single>.Select-control>.Select-value a.Select-value-label:hover{color:#007eff;outline:0;text-decoration:underline}.Select-input{height:34px;padding-left:10px;padding-right:10px;vertical-align:middle}.Select-input>input{width:100%;background:none;border:0;box-shadow:none;cursor:default;display:inline-block;font-family:inherit;font-size:inherit;margin:0;outline:0;line-height:14px;padding:8px 0 12px;-webkit-appearance:none}.Select-loading,.Select-loading-zone{width:16px;position:relative;vertical-align:middle}.is-focused .Select-input>input{cursor:text}.has-value.is-pseudo-focused .Select-input{opacity:0}.Select-control:not(.is-searchable)>.Select-input{outline:0}.Select-loading-zone{display:table-cell}.Select-loading{-webkit-animation:Select-animation-spin .4s infinite linear;-o-animation:Select-animation-spin .4s infinite linear;animation:Select-animation-spin .4s infinite linear;height:16px;box-sizing:border-box;border-radius:50%;border:2px solid #ccc;border-right-color:#333;display:inline-block}.Select-clear-zone{-webkit-animation:Select-animation-fadeIn .2s;-o-animation:Select-animation-fadeIn .2s;animation:Select-animation-fadeIn .2s;color:#999;display:table-cell;position:relative;vertical-align:middle;width:17px}.Select-clear-zone:hover{color:#D0021B}.Select-clear{display:inline-block;font-size:18px;line-height:1}.Select--multi .Select-clear-zone{width:17px}.Select-arrow-zone{display:table-cell;position:relative;vertical-align:middle;width:25px;padding-right:5px}.Select-arrow{border-color:#999 transparent transparent;border-style:solid;border-width:5px 5px 2.5px;display:inline-block;height:0;width:0}.Select-noresults,.Select-option{box-sizing:border-box;display:block;padding:8px 10px}.Select-arrow-zone:hover>.Select-arrow,.is-open .Select-arrow{border-top-color:#666}@-webkit-keyframes Select-animation-fadeIn{from{opacity:0}to{opacity:1}}@keyframes Select-animation-fadeIn{from{opacity:0}to{opacity:1}}.Select-menu-outer{border-bottom-right-radius:4px;border-bottom-left-radius:4px;background-color:#fff;border:1px solid #ccc;border-top-color:#e6e6e6;box-shadow:0 1px 0 rgba(0,0,0,.06);box-sizing:border-box;margin-top:-1px;max-height:200px;position:absolute;top:100%;width:100%;z-index:1;-webkit-overflow-scrolling:touch}.Select-menu{max-height:198px;overflow-y:auto}.Select-option{background-color:#fff;color:#666;cursor:pointer}.Select-option:last-child{border-bottom-right-radius:4px;border-bottom-left-radius:4px}.Select-option.is-selected{background-color:#f5faff;background-color:rgba(0,126,255,.04);color:#333}.Select-option.is-focused{background-color:#ebf5ff;background-color:rgba(0,126,255,.08);color:#333}.Select-option.is-disabled{color:#ccc;cursor:default}.Select-noresults{color:#999;cursor:default}.Select--multi .Select-input{vertical-align:middle;margin-left:10px;padding:0}.Select--multi.has-value .Select-input{margin-left:5px}.Select--multi .Select-value{background-color:#ebf5ff;background-color:rgba(0,126,255,.08);border-radius:2px;border:1px solid rgba(0,126,255,.24);color:#007eff;display:inline-block;font-size:.9em;line-height:1.4;margin-left:5px;margin-top:5px;vertical-align:top}.Select--multi .Select-value-icon,.Select--multi .Select-value-label{display:inline-block;vertical-align:middle}.Select--multi .Select-value-label{border-bottom-right-radius:2px;border-top-right-radius:2px;cursor:default;padding:2px 5px}.Select--multi a.Select-value-label{color:#007eff;cursor:pointer;text-decoration:none}.Select--multi a.Select-value-label:hover{text-decoration:underline}.Select--multi .Select-value-icon{cursor:pointer;border-bottom-left-radius:2px;border-top-left-radius:2px;border-right:1px solid #c2e0ff;border-right:1px solid rgba(0,126,255,.24);padding:1px 5px 3px}.Select--multi .Select-value-icon:focus,.Select--multi .Select-value-icon:hover{background-color:#d8eafd;background-color:rgba(0,113,230,.08);color:#0071e6}.Select--multi .Select-value-icon:active{background-color:#c2e0ff;background-color:rgba(0,126,255,.24)}.Select--multi.is-disabled .Select-value{background-color:#fcfcfc;border:1px solid #e3e3e3;color:#333}.Select--multi.is-disabled .Select-value-icon{cursor:not-allowed;border-right:1px solid #e3e3e3}.Select--multi.is-disabled .Select-value-icon:active,.Select--multi.is-disabled .Select-value-icon:focus,.Select--multi.is-disabled .Select-value-icon:hover{background-color:#fcfcfc}@keyframes Select-animation-spin{to{transform:rotate(1turn)}}@-webkit-keyframes Select-animation-spin{to{-webkit-transform:rotate(1turn)}}", ""]);
+
+	// exports
+
+
+/***/ },
+/* 171 */
+/***/ function(module, exports) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
+
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
+
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
+
+
+/***/ },
+/* 172 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	var stylesInDom = {},
+		memoize = function(fn) {
+			var memo;
+			return function () {
+				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+				return memo;
+			};
+		},
+		isOldIE = memoize(function() {
+			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+		}),
+		getHeadElement = memoize(function () {
+			return document.head || document.getElementsByTagName("head")[0];
+		}),
+		singletonElement = null,
+		singletonCounter = 0,
+		styleElementsInsertedAtTop = [];
+
+	module.exports = function(list, options) {
+		if(false) {
+			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+		}
+
+		options = options || {};
+		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+		// tags it will allow on a page
+		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+
+		// By default, add <style> tags to the bottom of <head>.
+		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
+
+		var styles = listToStyles(list);
+		addStylesToDom(styles, options);
+
+		return function update(newList) {
+			var mayRemove = [];
+			for(var i = 0; i < styles.length; i++) {
+				var item = styles[i];
+				var domStyle = stylesInDom[item.id];
+				domStyle.refs--;
+				mayRemove.push(domStyle);
+			}
+			if(newList) {
+				var newStyles = listToStyles(newList);
+				addStylesToDom(newStyles, options);
+			}
+			for(var i = 0; i < mayRemove.length; i++) {
+				var domStyle = mayRemove[i];
+				if(domStyle.refs === 0) {
+					for(var j = 0; j < domStyle.parts.length; j++)
+						domStyle.parts[j]();
+					delete stylesInDom[domStyle.id];
+				}
+			}
+		};
+	}
+
+	function addStylesToDom(styles, options) {
+		for(var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+			if(domStyle) {
+				domStyle.refs++;
+				for(var j = 0; j < domStyle.parts.length; j++) {
+					domStyle.parts[j](item.parts[j]);
+				}
+				for(; j < item.parts.length; j++) {
+					domStyle.parts.push(addStyle(item.parts[j], options));
+				}
+			} else {
+				var parts = [];
+				for(var j = 0; j < item.parts.length; j++) {
+					parts.push(addStyle(item.parts[j], options));
+				}
+				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+			}
+		}
+	}
+
+	function listToStyles(list) {
+		var styles = [];
+		var newStyles = {};
+		for(var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var id = item[0];
+			var css = item[1];
+			var media = item[2];
+			var sourceMap = item[3];
+			var part = {css: css, media: media, sourceMap: sourceMap};
+			if(!newStyles[id])
+				styles.push(newStyles[id] = {id: id, parts: [part]});
+			else
+				newStyles[id].parts.push(part);
+		}
+		return styles;
+	}
+
+	function insertStyleElement(options, styleElement) {
+		var head = getHeadElement();
+		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
+		if (options.insertAt === "top") {
+			if(!lastStyleElementInsertedAtTop) {
+				head.insertBefore(styleElement, head.firstChild);
+			} else if(lastStyleElementInsertedAtTop.nextSibling) {
+				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
+			} else {
+				head.appendChild(styleElement);
+			}
+			styleElementsInsertedAtTop.push(styleElement);
+		} else if (options.insertAt === "bottom") {
+			head.appendChild(styleElement);
+		} else {
+			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+		}
+	}
+
+	function removeStyleElement(styleElement) {
+		styleElement.parentNode.removeChild(styleElement);
+		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
+		if(idx >= 0) {
+			styleElementsInsertedAtTop.splice(idx, 1);
+		}
+	}
+
+	function createStyleElement(options) {
+		var styleElement = document.createElement("style");
+		styleElement.type = "text/css";
+		insertStyleElement(options, styleElement);
+		return styleElement;
+	}
+
+	function createLinkElement(options) {
+		var linkElement = document.createElement("link");
+		linkElement.rel = "stylesheet";
+		insertStyleElement(options, linkElement);
+		return linkElement;
+	}
+
+	function addStyle(obj, options) {
+		var styleElement, update, remove;
+
+		if (options.singleton) {
+			var styleIndex = singletonCounter++;
+			styleElement = singletonElement || (singletonElement = createStyleElement(options));
+			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
+			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
+		} else if(obj.sourceMap &&
+			typeof URL === "function" &&
+			typeof URL.createObjectURL === "function" &&
+			typeof URL.revokeObjectURL === "function" &&
+			typeof Blob === "function" &&
+			typeof btoa === "function") {
+			styleElement = createLinkElement(options);
+			update = updateLink.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+				if(styleElement.href)
+					URL.revokeObjectURL(styleElement.href);
+			};
+		} else {
+			styleElement = createStyleElement(options);
+			update = applyToTag.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+			};
+		}
+
+		update(obj);
+
+		return function updateStyle(newObj) {
+			if(newObj) {
+				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
+					return;
+				update(obj = newObj);
+			} else {
+				remove();
+			}
+		};
+	}
+
+	var replaceText = (function () {
+		var textStore = [];
+
+		return function (index, replacement) {
+			textStore[index] = replacement;
+			return textStore.filter(Boolean).join('\n');
+		};
+	})();
+
+	function applyToSingletonTag(styleElement, index, remove, obj) {
+		var css = remove ? "" : obj.css;
+
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = replaceText(index, css);
+		} else {
+			var cssNode = document.createTextNode(css);
+			var childNodes = styleElement.childNodes;
+			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
+			if (childNodes.length) {
+				styleElement.insertBefore(cssNode, childNodes[index]);
+			} else {
+				styleElement.appendChild(cssNode);
+			}
+		}
+	}
+
+	function applyToTag(styleElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+
+		if(media) {
+			styleElement.setAttribute("media", media)
+		}
+
+		if(styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = css;
+		} else {
+			while(styleElement.firstChild) {
+				styleElement.removeChild(styleElement.firstChild);
+			}
+			styleElement.appendChild(document.createTextNode(css));
+		}
+	}
+
+	function updateLink(linkElement, obj) {
+		var css = obj.css;
+		var sourceMap = obj.sourceMap;
+
+		if(sourceMap) {
+			// http://stackoverflow.com/a/26603875
+			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+		}
+
+		var blob = new Blob([css], { type: "text/css" });
+
+		var oldSrc = linkElement.href;
+
+		linkElement.href = URL.createObjectURL(blob);
+
+		if(oldSrc)
+			URL.revokeObjectURL(oldSrc);
+	}
+
 
 /***/ }
 /******/ ]);
